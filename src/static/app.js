@@ -84,3 +84,69 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize app
   fetchActivities();
 });
+
+document.addEventListener('DOMContentLoaded', init);
+
+function init() {
+  fetch('/activities')
+    .then((r) => r.json())
+    .then(renderActivities)
+    .catch((err) => {
+      console.error('Failed to load activities', err);
+    });
+}
+
+function renderActivities(data) {
+  const container = document.getElementById('activitiesContainer');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  Object.entries(data).forEach(([name, activity]) => {
+    const card = document.createElement('div');
+    card.className = 'activity-card';
+
+    const title = document.createElement('h4');
+    title.textContent = name;
+
+    const desc = document.createElement('p');
+    desc.textContent = activity.description;
+
+    const schedule = document.createElement('p');
+    schedule.textContent = `Schedule: ${activity.schedule}`;
+
+    const spots = document.createElement('p');
+    spots.textContent = `Spots: ${activity.participants.length} / ${activity.max_participants}`;
+
+    // Participants section
+    const parts = document.createElement('div');
+    parts.className = 'participants';
+    const ph = document.createElement('h5');
+    ph.textContent = 'Participants';
+    const ul = document.createElement('ul');
+
+    if (Array.isArray(activity.participants) && activity.participants.length > 0) {
+      activity.participants.forEach((email) => {
+        const li = document.createElement('li');
+        li.textContent = email;
+        ul.appendChild(li);
+      });
+    } else {
+      const li = document.createElement('li');
+      li.className = 'muted';
+      li.textContent = 'No participants yet';
+      ul.appendChild(li);
+    }
+
+    parts.appendChild(ph);
+    parts.appendChild(ul);
+
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.appendChild(schedule);
+    card.appendChild(spots);
+    card.appendChild(parts);
+
+    container.appendChild(card);
+  });
+}
